@@ -1,110 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>裝置連線監控中</title>
+  <meta charset="UTF-8">
+  <title>裝置清單</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
   <style>
+    * { box-sizing: border-box; }
     body {
-      background-color: black;
-      color: #33ff33;
+      background-color: #000;
+      color: #0f0;
       font-family: 'Courier New', Courier, monospace;
+      padding: 1rem;
       margin: 0;
       overflow: hidden;
     }
-    .warning {
-      color: red;
-      font-size: 1.5em;
+    .banner {
+      background: red;
+      color: white;
+      padding: 1rem;
       text-align: center;
-      margin-top: 10px;
-      animation: blink 1s infinite;
+      font-size: 1.5rem;
+      font-weight: bold;
+      animation: blink 0.5s step-end infinite alternate;
     }
     @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0.3; }
+    }
+    .device-list {
+      margin-top: 2rem;
+    }
+    .device {
+      background: #111;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border: 1px solid #0f0;
+    }
+    #no-signal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url('https://media.tenor.com/CGbK2TZG-C0AAAAC/no-signal.gif') center/cover no-repeat;
+      z-index: 9999;
+      animation: flash 1s ease-in-out 3, rainbow 0.2s infinite;
+    }
+    @keyframes flash {
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
-    .device-list {
-      padding: 20px;
+    @keyframes rainbow {
+      0% { background-color: red; }
+      14% { background-color: orange; }
+      28% { background-color: yellow; }
+      42% { background-color: green; }
+      57% { background-color: blue; }
+      71% { background-color: indigo; }
+      85% { background-color: violet; }
+      100% { background-color: red; }
     }
-    .glitch {
-      animation: glitch 0.3s infinite;
+    .qr {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: #fff;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      z-index: 10;
+      cursor: pointer;
+      transition: all 0.5s ease;
     }
-    @keyframes glitch {
-      0% { transform: skew(0.5deg); }
-      20% { transform: skew(-1deg); }
-      40% { transform: skew(1.5deg); }
-      60% { transform: skew(-0.5deg); }
-      80% { transform: skew(1deg); }
-      100% { transform: skew(0deg); }
+    .qr img {
+      width: 150px;
+      height: 150px;
     }
-    .qr-code {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: white;
-      padding: 10px;
+    .error-window {
+      position: absolute;
+      width: 300px;
+      background: #ddd;
+      border: 2px solid #000;
+      padding: 0.5rem;
+      font-family: sans-serif;
+      box-shadow: 5px 5px 0px #000;
       z-index: 1000;
     }
-    .qr-code-text {
-      color: white;
-      font-size: 0.8em;
-      text-align: center;
+    .error-header {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      background: #000080;
+      color: #fff;
+      padding: 0.2rem;
     }
-    .no-signal {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/2/27/Color_Bars.svg');
-      background-size: cover;
-      z-index: 999;
-      animation: flash 0.15s ease-in-out 5;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 0; }
-      25%, 75% { opacity: 1; }
+    .close-btn {
+      float: right;
+      cursor: pointer;
+      color: red;
     }
   </style>
 </head>
 <body>
-  <div class="no-signal"></div>
-  <div class="warning">‼️ 裝置連線已被監控 ‼️</div>
-  <div class="device-list">
-    <p>192.168.1.241 - 48:E7:DA:43:22:17</p>
-    <p>192.168.1.157 - 12:34:56:78:90:AB</p>
-    <p>192.168.1.102 - 22:33:44:55:66:77</p>
-  </div>
-  <div class="qr-code">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="Rickroll QR">
-    <div class="qr-code-text">掃描查看詳細資訊</div>
-  </div>
-  <script>
-    // 隨機生成錯誤視窗
-    function spawnErrorWindow() {
-      const win = document.createElement('div');
-      win.textContent = '錯誤：系統異常';
-      win.style.position = 'fixed';
-      win.style.top = Math.random() * window.innerHeight + 'px';
-      win.style.left = Math.random() * window.innerWidth + 'px';
-      win.style.background = 'white';
-      win.style.color = 'black';
-      win.style.padding = '10px';
-      win.style.border = '2px solid red';
-      win.style.zIndex = 1001;
-      document.body.appendChild(win);
-    }
+  <div id="no-signal"></div>
 
-    document.body.addEventListener('click', () => {
-      spawnErrorWindow();
+  <div class="banner">‼️ 正在嘗試連線裝置 ‼️</div>
+
+  <div class="device-list">
+    <div class="device">
+      <strong>名稱：</strong>未知裝置 A01<br>
+      <strong>IP：</strong>192.168.1.241<br>
+      <strong>MAC：</strong>48:E7:DA:43:22:17<br>
+      <strong>地點：</strong>新北市板橋區大觀路一段
+    </div>
+    <div class="device">
+      <strong>名稱：</strong>Unknown_Device_02<br>
+      <strong>IP：</strong>192.168.1.109<br>
+      <strong>MAC：</strong>34:AF:2B:91:88:6E<br>
+      <strong>地點：</strong>新北市板橋區大觀路一段
+    </div>
+  </div>
+
+  <div class="qr">
+    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
+    </a>
+  </div>
+
+  <audio id="alarm" src="https://freesound.org/data/previews/522/522304_10629644-lq.mp3" autoplay></audio>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('no-signal').remove();
+      }, 3000);
     });
 
-    // 螢幕崩壞閃爍效果
+    // QR隨機變換位置
     setInterval(() => {
-      document.body.classList.toggle('glitch');
-    }, 3000);
+      const qr = document.querySelector('.qr');
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const randomX = Math.random() * (screenWidth - 160); // 150px QR + 10px padding
+      const randomY = Math.random() * (screenHeight - 160); // 150px QR + 10px padding
+      qr.style.left = `${randomX}px`;
+      qr.style.top = `${randomY}px`;
+    }, 2000);
 
-    // 警報音效
-    const audio = new Audio('https://cdn.pixabay.com/download/audio/2021/08/04/audio_b4e9e69216.mp3');
-    audio.play();
+    document.body.addEventListener('click', (e) => {
+      const err = document.createElement('div');
+      err.className = 'error-window';
+      err.style.top = `${e.clientY}px`;
+      err.style.left = `${e.clientX}px`;
+      err.innerHTML = `
+        <div class="error-header">錯誤 - 系統偵測異常 <span class="close-btn" onclick="this.parentElement.parentElement.remove()">X</span></div>
+        無法辨識的裝置正在嘗試連線至您的網路。
+      `;
+      document.body.appendChild(err);
+    });
   </script>
 </body>
 </html>
