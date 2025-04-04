@@ -1,160 +1,288 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>裝置清單</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      background-color: #000;
-      color: #0f0;
-      font-family: 'Courier New', Courier, monospace;
-      padding: 1rem;
-      margin: 0;
-      overflow: hidden;
-    }
-    .banner {
-      background: red;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      animation: blink 0.5s step-end infinite alternate;
-    }
-    @keyframes blink {
-      from { opacity: 1; }
-      to { opacity: 0.3; }
-    }
-    .device-list {
-      margin-top: 2rem;
-    }
-    .device {
-      background: #111;
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border: 1px solid #0f0;
-    }
-    #no-signal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: url('https://media.tenor.com/CGbK2TZG-C0AAAAC/no-signal.gif') center/cover no-repeat;
-      z-index: 9999;
-      animation: flash 1s ease-in-out 3, rainbow 0.2s infinite;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    @keyframes rainbow {
-      0% { background-color: red; }
-      14% { background-color: orange; }
-      28% { background-color: yellow; }
-      42% { background-color: green; }
-      57% { background-color: blue; }
-      71% { background-color: indigo; }
-      85% { background-color: violet; }
-      100% { background-color: red; }
-    }
-    .qr {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      background: #fff;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      z-index: 10;
-      cursor: pointer;
-      transition: all 0.5s ease;
-    }
-    .qr img {
-      width: 150px;
-      height: 150px;
-    }
-    .error-window {
-      position: absolute;
-      width: 300px;
-      background: #ddd;
-      border: 2px solid #000;
-      padding: 0.5rem;
-      font-family: sans-serif;
-      box-shadow: 5px 5px 0px #000;
-      z-index: 1000;
-    }
-    .error-header {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      background: #000080;
-      color: #fff;
-      padding: 0.2rem;
-    }
-    .close-btn {
-      float: right;
-      cursor: pointer;
-      color: red;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>裝置清單</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 初始的舒適風格 */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            font-family: sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .banner {
+            background-color: #5cb85c;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .device-list {
+            margin-top: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .device {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 1px;
+            border-bottom: 1px solid #eee;
+        }
+        .device:last-child {
+            border-bottom: none;
+        }
+        .device strong {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .qr {
+            display: none; /* 初始和崩壞時都隱藏 */
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+        .qr:hover {
+            opacity: 0.8;
+        }
+        .qr img {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* 崩壞後的樣式 */
+        body.broken {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 1rem;
+            overflow: hidden;
+        }
+        .broken .container {
+            max-width: none;
+            margin: 0;
+        }
+        .broken .banner {
+            background: red;
+            animation: blink 0.5s step-end infinite alternate;
+            border-radius: 0;
+            margin-bottom: 0;
+        }
+        .broken .device-list {
+            margin-top: 2rem;
+            border: 1px solid #0f0;
+            border-radius: 0;
+            overflow: visible;
+        }
+        .broken .device {
+            background: #111;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: none;
+            border-bottom: 1px solid #0f0;
+        }
+        .broken #no-signal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url('https://media.tenor.com/CGbK2TZG-C0AAAAC/no-signal.gif') center/cover no-repeat;
+            z-index: 9999;
+            animation: flash 1s ease-in-out 3, rainbow 0.2s infinite;
+        }
+        .broken .qr {
+            /* 保持隱藏 */
+        }
+        .broken .qr img {
+            width: 150px;
+            height: 150px;
+        }
+        .broken .error-window {
+            position: absolute;
+            width: 300px;
+            background: #ddd;
+            border: 2px solid #000;
+            padding: 0.5rem;
+            font-family: sans-serif;
+            box-shadow: 5px 5px 0px #000;
+            z-index: 1000;
+        }
+        .broken .error-header {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: #000080;
+            color: #fff;
+            padding: 0.2rem;
+        }
+        .broken .close-btn {
+            float: right;
+            cursor: pointer;
+            color: red;
+        }
+        body.restored .qr {
+            display: block !important; /* 在恢復時顯示 QR 碼 */
+        }
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.3; }
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes rainbow {
+            0% { background-color: red; }
+            14% { background-color: orange; }
+            28% { background-color: yellow; }
+            42% { background-color: green; }
+            57% { background-color: blue; }
+            71% { background-color: indigo; }
+            85% { background-color: violet; }
+            100% { background-color: red; }
+        }
+    </style>
 </head>
 <body>
-  <div id="no-signal"></div>
-
-  <div class="banner">‼️ 正在嘗試連線裝置 ‼️</div>
-
-  <div class="device-list">
-    <div class="device">
-      <strong>名稱：</strong>未知裝置 A01<br>
-      <strong>IP：</strong>192.168.1.241<br>
-      <strong>MAC：</strong>48:E7:DA:43:22:17<br>
-      <strong>地點：</strong>新北市板橋區大觀路一段
+    <div class="container">
+        <div class="banner">裝置清單已載入</div>
+        <div class="device-list">
+            <div class="device">
+                <strong>名稱：</strong>未知裝置 A01<br>
+                <strong>IP：</strong>192.168.1.241<br>
+                <strong>MAC：</strong>48:E7:DA:43:22:17<br>
+                <strong>地點：</strong>新北市板橋區大觀路一段
+            </div>
+            <div class="device">
+                <strong>名稱：</strong>Unknown_Device_02<br>
+                <strong>IP：</strong>192.168.1.109<br>
+                <strong>MAC：</strong>34:AF:2B:91:88:6E<br>
+                <strong>地點：</strong>新北市板橋區大觀路一段
+            </div>
+        </div>
     </div>
-    <div class="device">
-      <strong>名稱：</strong>Unknown_Device_02<br>
-      <strong>IP：</strong>192.168.1.109<br>
-      <strong>MAC：</strong>34:AF:2B:91:88:6E<br>
-      <strong>地點：</strong>新北市板橋區大觀路一段
+
+    <div class="qr">
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
+        </a>
     </div>
-  </div>
 
-  <div class="qr">
-    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
-    </a>
-  </div>
+    <audio id="alarm" src="https://freesound.org/data/previews/522/522304_10629644-lq.mp3" preload="auto"></audio>
+    <div id="no-signal" style="display: none;"></div>
 
-  <audio id="alarm" src="https://freesound.org/data/previews/522/522304_10629644-lq.mp3" autoplay></audio>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const container = document.querySelector('.container');
+            const banner = document.querySelector('.banner');
+            const deviceList = document.querySelector('.device-list');
+            const qr = document.querySelector('.qr');
+            const qrImage = qr.querySelector('img');
+            const noSignal = document.getElementById('no-signal');
+            const alarm = document.getElementById('alarm');
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        document.getElementById('no-signal').remove();
-      }, 3000);
-    });
+            const initialDelay = 7000; // 初始乾淨樣式持續時間 (毫秒)
+            const brokenDuration = 5000; // 崩壞樣式持續時間 (毫秒)
 
-    // QR隨機變換位置
-    setInterval(() => {
-      const qr = document.querySelector('.qr');
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      const randomX = Math.random() * (screenWidth - 160); // 150px QR + 10px padding
-      const randomY = Math.random() * (screenHeight - 160); // 150px QR + 10px padding
-      qr.style.left = `${randomX}px`;
-      qr.style.top = `${randomY}px`;
-    }, 2000);
+            let qrIntervalId;
+            let clickListener;
+            let errorIntervalId;
 
-    document.body.addEventListener('click', (e) => {
-      const err = document.createElement('div');
-      err.className = 'error-window';
-      err.style.top = `${e.clientY}px`;
-      err.style.left = `${e.clientX}px`;
-      err.innerHTML = `
-        <div class="error-header">錯誤 - 系統偵測異常 <span class="close-btn" onclick="this.parentElement.parentElement.remove()">X</span></div>
-        無法辨識的裝置正在嘗試連線至您的網路。
-      `;
-      document.body.appendChild(err);
-    });
-  </script>
+            // 啟動崩壞效果
+            const startBreakdown = () => {
+                body.classList.add('broken');
+                noSignal.style.display = 'block';
+                alarm.play();
+
+                // 更換 QR 碼圖片和樣式 (但保持隱藏)
+                qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                qr.style.width = '150px';
+                qr.style.height = '150px';
+                qrImage.style.width = '150px';
+                qrImage.style.height = '150px';
+                // QR 碼在 CSS 中預設是隱藏的
+
+                // 清除可能殘留的 QR 移動 interval (以防萬一)
+                clearInterval(qrIntervalId);
+
+                // 啟用點擊產生錯誤訊息 (在崩壞時)
+                clickListener = (e) => {
+                    createErrorWindow(e.clientX, e.clientY);
+                };
+                document.body.addEventListener('click', clickListener);
+
+                // 更快速地自動產生錯誤視窗
+                errorIntervalId = setInterval(() => {
+                    const randomX = Math.random() * (window.innerWidth - 320);
+                    const randomY = Math.random() * (window.innerHeight - 150);
+                    createErrorWindow(randomX, randomY);
+                }, 500);
+            };
+
+            // 創建錯誤視窗的函數
+            const createErrorWindow = (x, y) => {
+                const err = document.createElement('div');
+                err.className = 'error-window';
+                err.style.top = `${y}px`;
+                err.style.left = `${x}px`;
+                err.innerHTML = `
+                    <div class="error-header">錯誤 - 嚴重系統故障 <span class="close-btn" onclick="this.parentElement.parentElement.remove()">X</span></div>
+                    系統遭遇無法修復的錯誤，所有資料可能已遺失。
+                    <br><br>
+                    請立即尋求技術支援。
+                `;
+                document.body.appendChild(err);
+            };
+
+            // 恢復初始乾淨樣式
+            const restoreNormal = () => {
+                body.classList.remove('broken');
+                body.classList.add('restored'); // 添加 restored class
+                noSignal.style.display = 'none';
+                alarm.pause();
+                alarm.currentTime = 0;
+
+                // 清除自動產生錯誤視窗的 interval
+                clearInterval(errorIntervalId);
+
+                // 移除所有殘留的錯誤視窗
+                const errorWindows = document.querySelectorAll('.error-window');
+                errorWindows.forEach(window => window.remove());
+
+                // 恢復 QR 碼的樣式和位置，並顯示它
+                qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // 恢復 QR 碼圖片 (如果需要)
+                qr.style.width = '100px';
+                qr.style.height = '100px';
+                qrImage.style.width = '100px';
+                qrImage.style.height = '100px';
+                qr.style.left = '20px';
+                qr.style.bottom = '20px';
+                qr.style.top = '';
+            };
+
+            // 初始延遲後啟動崩壞
+            setTimeout(startBreakdown, initialDelay);
+
+            // 在崩壞持續一段時間後恢復
+            setTimeout(restoreNormal, initialDelay + brokenDuration);
+        });
+    </script>
 </body>
 </html>
