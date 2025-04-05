@@ -300,13 +300,6 @@
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
 
   const firebaseConfig = {
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
   apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
   authDomain: "device-list-monitor-b59b8.firebaseapp.com",
   databaseURL: "https://device-list-monitor-b59b8-default-rtdb.firebaseio.com",
@@ -315,10 +308,6 @@ const firebaseConfig = {
   messagingSenderId: "1049547150285",
   appId: "1:1049547150285:web:e42edebcd86b45351faa84"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-  };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
