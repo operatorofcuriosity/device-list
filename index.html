@@ -1,60 +1,65 @@
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>裝置清單</title>
+    <title>裝置清單 Device List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* 初始的舒適風格 */
+        /* 初始的舒適風格 (美化後) */
         * { box-sizing: border-box; }
         body {
-            background-color: #f4f4f4;
-            color: #333;
-            font-family: sans-serif;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9; /* 更柔和的淺灰色背景 */
+            color: #444; /* 更深的灰色文字 */
+            padding: 30px; /* 增加一些內距 */
             margin: 0;
+            line-height: 1.6; /* 增加行高，提升閱讀舒適度 */
+        }
+        h1 {
+            color: #007bff; /* 更現代的主題色 */
+            margin-bottom: 30px;
+            text-align: center; /* 標題置中 */
         }
         .container {
-            max-width: 800px;
+            max-width: 900px; /* 稍微增加容器寬度 */
             margin: 0 auto;
+            background-color: #fff; /* 白色容器背景 */
+            border-radius: 8px; /* 增加圓角 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 增加陰影 */
+            padding: 30px; /* 容器內距 */
         }
         .banner {
-            background-color: #5cb85c;
+            background-color: #28a745; /* 更現代的綠色 */
             color: white;
             padding: 15px;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* 稍微調整字體大小 */
             border-radius: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         .device-list {
             margin-top: 1rem;
-            border: 1px solid #ddd;
+            border: 1px solid #eee; /* 更淡的邊框 */
             border-radius: 5px;
             overflow: hidden;
         }
         .device {
-            background-color: white;
+            background-color: #fff;
             padding: 15px;
             margin-bottom: 1px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f2f2f2; /* 更淡的分隔線 */
+            display: flex; /* 使用 Flexbox 進行排版 */
+            gap: 15px; /* 項目之間的間距 */
+            align-items: center; /* 垂直居中 */
         }
         .device:last-child {
             border-bottom: none;
         }
         .device strong {
             font-weight: bold;
-            color: #007bff;
+            color: #333; /* 更深的強調色 */
+            min-width: 60px; /* 確保標籤寬度一致 */
         }
         .qr {
             display: none; /* 初始和崩壞時都隱藏 */
@@ -73,11 +78,9 @@
             opacity: 0.8;
         }
         .qr img {
-            width: 100px;
-            height: 100px;
+            width: 80px; /* 稍微縮小 QR 碼 */
+            height: 80px;
         }
-
-        /* 崩壞後的樣式 */
         body.broken {
             background-color: #000;
             color: #0f0;
@@ -88,6 +91,10 @@
         .broken .container {
             max-width: none;
             margin: 0;
+            background-color: transparent; /* 透明背景 */
+            border-radius: 0;
+            box-shadow: none;
+            padding: 1rem;
         }
         .broken .banner {
             background: red;
@@ -107,6 +114,13 @@
             margin: 0.5rem 0;
             border: none;
             border-bottom: 1px solid #0f0;
+            display: block; /* 恢復塊級元素 */
+            gap: 0;
+            align-items: flex-start;
+        }
+        .broken .device strong {
+            color: #0f0;
+            min-width: auto;
         }
         .broken #no-signal {
             position: fixed;
@@ -122,6 +136,9 @@
         .broken .qr img {
             width: 150px;
             height: 150px;
+        }
+        body.restored .qr {
+            display: block !important;
         }
         .broken .error-window {
             position: absolute;
@@ -145,9 +162,6 @@
             cursor: pointer;
             color: red;
         }
-        body.restored .qr {
-            display: block !important; /* 在恢復時顯示 QR 碼 */
-        }
         @keyframes blink {
             from { opacity: 1; }
             to { opacity: 0.3; }
@@ -170,45 +184,66 @@
 </head>
 <body>
     <div class="container">
+        <h1>📡 裝置清單</h1>
         <div class="banner">裝置清單已載入</div>
-        <div class="device-list">
-            <div class="device">
-                <strong>名稱：</strong>未知裝置 A01<br>
-                <strong>IP：</strong>192.168.1.241<br>
-                <strong>MAC：</strong>48:E7:DA:43:22:17<br>
-                <strong>地點：</strong>新北市板橋區大觀路一段
-            </div>
-            <div class="device">
-                <strong>名稱：</strong>Unknown_Device_02<br>
-                <strong>IP：</strong>192.168.1.109<br>
-                <strong>MAC：</strong>34:AF:2B:91:88:6E<br>
-                <strong>地點：</strong>新北市板橋區大觀路一段
-            </div>
-        </div>
+        <div class="device-list" id="device-list">載入中...</div>
     </div>
-
     <div class="qr">
         <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
         </a>
     </div>
-
     <audio id="alarm" src="https://freesound.org/data/previews/522/522304_10629644-lq.mp3" preload="auto"></audio>
     <div id="no-signal" style="display: none;"></div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
+            authDomain: "device-list-monitor-b59b8.firebaseapp.com",
+            databaseURL: "https://device-list-monitor-b59b8-default-rtdb.firebaseio.com",
+            projectId: "device-list-monitor-b59b8",
+            storageBucket: "device-list-monitor-b59b8.appspot.com",
+            messagingSenderId: "1049547150285",
+            appId: "1:1049547150285:web:e42edebcd86b45351faa84"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 監聽裝置資料
+        const deviceListElement = document.querySelector("#device-list");
+        const devicesRef = ref(db, "devices");
+
+        onValue(devicesRef, (snapshot) => {
+            const data = snapshot.val();
+            deviceListElement.innerHTML = ""; // 清空列表
+            for (const id in data) {
+                const device = data[id];
+                const div = document.createElement("div");
+                div.className = "device";
+                div.innerHTML = `
+                    <strong>名稱：</strong>${device.name}<br>
+                    <strong>IP：</strong>${device.ip}<br>
+                    <strong>MAC：</strong>${device.mac}<br>
+                    <strong>地點：</strong>${device.location}
+                `;
+                deviceListElement.appendChild(div);
+            }
+        });
+
+        // 崩壞效果函數
         document.addEventListener('DOMContentLoaded', () => {
             const body = document.body;
-            const container = document.querySelector('.container');
-            const banner = document.querySelector('.banner');
-            const deviceList = document.querySelector('.device-list');
             const qr = document.querySelector('.qr');
             const qrImage = qr.querySelector('img');
             const noSignal = document.getElementById('no-signal');
             const alarm = document.getElementById('alarm');
 
-            const initialDelay = 7000; // 初始乾淨樣式持續時間 (毫秒)
-            const brokenDuration = 5000; // 崩壞樣式持續時間 (毫秒)
+            const initialDelay = 7000;
+            const brokenDuration = 5000;
 
             let qrIntervalId;
             let clickListener;
@@ -226,9 +261,8 @@
                 qr.style.height = '150px';
                 qrImage.style.width = '150px';
                 qrImage.style.height = '150px';
-                // QR 碼在 CSS 中預設是隱藏的
 
-                // 清除可能殘留的 QR 移動 interval (以防萬一)
+                // 清除可能殘留的 QR 移動 interval
                 clearInterval(qrIntervalId);
 
                 // 啟用點擊產生錯誤訊息 (在崩壞時)
@@ -260,7 +294,7 @@
                 document.body.appendChild(err);
             };
 
-            // 恢復初始乾淨樣式
+            // 恢復正常狀態
             const restoreNormal = () => {
                 body.classList.remove('broken');
                 body.classList.add('restored'); // 添加 restored class
@@ -276,14 +310,16 @@
                 errorWindows.forEach(window => window.remove());
 
                 // 恢復 QR 碼的樣式和位置，並顯示它
-                qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // 恢復 QR 碼圖片 (如果需要)
-                qr.style.width = '100px';
-                qr.style.height = '100px';
-                qrImage.style.width = '100px';
-                qrImage.style.height = '100px';
-                qr.style.left = '20px';
-                qr.style.bottom = '20px';
-                qr.style.top = '';
+                const qrElement = document.querySelector('.qr');
+                const qrImageElement = qrElement.querySelector('img');
+                qrImageElement.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // 恢復 QR 碼圖片 (如果需要)
+                qrElement.style.width = '100px';
+                qrElement.style.height = '100px';
+                qrImageElement.style.width = '100px';
+                qrImageElement.style.height = '100px';
+                qrElement.style.left = '20px';
+                qrElement.style.bottom = '20px';
+                qrElement.style.top = '';
             };
 
             // 初始延遲後啟動崩壞
@@ -294,46 +330,6 @@
         });
     </script>
 </body>
-<script type="module">
-  // Firebase 初始化
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-
-  const firebaseConfig = {
-  apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
-  authDomain: "device-list-monitor-b59b8.firebaseapp.com",
-  databaseURL: "https://device-list-monitor-b59b8-default-rtdb.firebaseio.com",
-  projectId: "device-list-monitor-b59b8",
-  storageBucket: "device-list-monitor-b59b8.firebasestorage.app",
-  messagingSenderId: "1049547150285",
-  appId: "1:1049547150285:web:e42edebcd86b45351faa84"
-};
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // 監聽裝置資料
-  const deviceList = document.querySelector(".device-list");
-  const devicesRef = ref(db, "devices");
-
-  onValue(devicesRef, (snapshot) => {
-    const data = snapshot.val();
-    deviceList.innerHTML = ""; // 清空列表
-    for (const id in data) {
-      const device = data[id];
-      const div = document.createElement("div");
-      div.className = "device";
-      div.innerHTML = `
-        <strong>名稱：</strong>${device.name}<br>
-        <strong>IP：</strong>${device.ip}<br>
-        <strong>MAC：</strong>${device.mac}<br>
-        <strong>地點：</strong>${device.location}
-      `;
-      deviceList.appendChild(div);
-    }
-  });
-</script>
-
 </html>
 
 
