@@ -1,2 +1,11 @@
 .env
 secrets/
+node_modules/
+.env
+*.pyc
+*.log
+*.csv
+AppData/
+*.exe
+*.jar
+__pycache__/

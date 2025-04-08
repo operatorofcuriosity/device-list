@@ -14,7 +14,8 @@
   <script>
     async function fetchDevices() {
       try {
-        const res = await fetch("device-list.json");
+        const res = await fetch('device-list.json?ts=' + new Date().getTime())
+;
         const data = await res.json();
         const table = document.getElementById("deviceTable");
         table.innerHTML = "<tr><th>名稱</th><th>IP</th><th>MAC</th><th>位置</th></tr>";
