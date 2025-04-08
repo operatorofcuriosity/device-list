@@ -1,0 +1,13 @@
+{
+  "name": "clean-device-list",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^11.11.1"
+  }
+}
