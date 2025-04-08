@@ -1,46 +1,180 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>裝置清單</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>裝置異常連線清單</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #111; color: #eee; }
-    h1 { color: #6cf; }
-    .device { border-bottom: 1px solid #444; padding: 1rem 0; }
-    .key { font-weight: bold; }
+    body {
+      background-color: #0e0e0e;
+      color: #00ff9f;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 2rem;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #ff0066;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      animation: glitch 2s infinite;
+    }
+
+    #device-list {
+      background: #111;
+      border: 1px solid #555;
+      padding: 1rem;
+      border-radius: 6px;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: 0 0 10px #00ff9f;
+    }
+
+    .device {
+      border-bottom: 1px solid #333;
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .device:last-child {
+      border-bottom: none;
+    }
+
+    .icon {
+      margin-right: 1rem;
+      color: #ffcc00;
+    }
+
+    .glitch {
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 red, -2px 0 blue; }
+      20% { text-shadow: -2px 0 red, 2px 0 blue; }
+      40% { text-shadow: 2px 0 red, -2px 0 blue; }
+      60% { text-shadow: -2px 0 red, 2px 0 blue; }
+      80% { text-shadow: 2px 0 red, -2px 0 blue; }
+      100% { text-shadow: -2px 0 red, 2px 0 blue; }
+    }
+
+    .error-popup {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 300px;
+      background-color: #eee;
+      color: black;
+      border: 2px solid red;
+      padding: 1rem;
+      font-family: Arial, sans-serif;
+      display: none;
+      z-index: 9999;
+      animation: shake 0.3s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px); }
+      25% { transform: translate(-1px, 2px); }
+      50% { transform: translate(-3px, 1px); }
+      75% { transform: translate(3px, 1px); }
+      100% { transform: translate(1px, -1px); }
+    }
+
+    #no-signal {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3rem;
+      font-weight: bold;
+      z-index: 10000;
+      display: none;
+      animation: flicker 0.15s steps(2, start) 4;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
   </style>
 </head>
 <body>
-  <h1>📡 裝置清單</h1>
+  <div id="no-signal">NO SIGNAL</div>
+  <h1 class="glitch">⚠️ 裝置異常連線清單 ⚠️</h1>
   <div id="device-list">載入中...</div>
 
+  <div class="error-popup" id="error-popup">
+    <strong>錯誤</strong><br>
+    系統發生不明錯誤。<br>
+    <button onclick="document.getElementById('error-popup').style.display='none'">確定</button>
+  </div>
+
   <script>
-    fetch('device-list.json')
+    // 模擬讀取 JSON
+    fetch('./device-list.json')
       .then(res => res.json())
       .then(data => {
-        const devices = data.devices || {};
         const container = document.getElementById('device-list');
         container.innerHTML = '';
-
-        Object.entries(devices).forEach(([id, info]) => {
+        data.forEach(d => {
           const el = document.createElement('div');
           el.className = 'device';
           el.innerHTML = `
-            <div><span class="key">ID:</span> ${id}</div>
-            <div><span class="key">Device:</span> ${info.device}</div>
-            <div><span class="key">IP:</span> ${info.ip}</div>
-            <div><span class="key">Last Seen:</span> ${info.lastSeen}</div>
-            <div><span class="key">OS:</span> ${info.os}</div>
-            <div><span class="key">Owner:</span> ${info.owner}</div>
-            <div><span class="key">Type:</span> ${info.type}</div>
+            <i class="fas fa-${getIcon(d.deviceType)} icon"></i>
+            <div>
+              <div><strong>${d.deviceName || '未知裝置'}</strong></div>
+              <div>${d.macAddress || ''}</div>
+            </div>
           `;
           container.appendChild(el);
         });
-      })
-      .catch(err => {
-        document.getElementById('device-list').innerText = '⚠️ 無法載入資料';
-        console.error(err);
       });
+
+    function getIcon(type) {
+      switch(type) {
+        case 'phone': return 'mobile-alt';
+        case 'laptop': return 'laptop';
+        case 'tablet': return 'tablet-alt';
+        default: return 'question';
+      }
+    }
+
+    // 開場 No Signal
+    const noSignal = document.getElementById('no-signal');
+    noSignal.style.display = 'flex';
+    setTimeout(() => {
+      noSignal.style.display = 'none';
+      playBeep();
+    }, 1200);
+
+    // 滑鼠移動觸發錯誤
+    let triggered = false;
+    window.addEventListener('mousemove', () => {
+      if (!triggered) {
+        triggered = true;
+        const popup = document.getElementById('error-popup');
+        popup.style.display = 'block';
+      }
+    });
+
+    function playBeep() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.value = 880;
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start();
+      setTimeout(() => o.stop(), 200);
+    }
   </script>
 </body>
 </html>
