@@ -1,44 +1,33 @@
-name: Daily Update
+name: Daily Device List Update
 
 on:
   schedule:
-    # 每天 00:00 UTC 定時執行，你也可以調整 cron 表示法
-    - cron: '0 0 * * *'
-  workflow_dispatch:  # 允許手動觸發
+    # 設定每天執行的時間，這裡是每天凌晨 12 點（UTC 時間）
+    - cron: '0 0 * * *'  # 可以根據需求修改時間
+  workflow_dispatch:
 
 jobs:
-  update-job:
+  update-devices:
     runs-on: ubuntu-latest
 
     steps:
-      # 檢出程式碼
-      - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      # 安裝 Node.js（指定版本，例如 16）
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # 根據你的 Node.js 版本選擇
 
-      # 安裝相依套件（如果有 package.json）
-      - run: npm install
+    - name: Install dependencies
+      run: |
+        npm install
 
-      # 執行你的測試或更新腳本
-      - name: Run update script
-        run: node test.cjs
-
-      # 設定 git 使用者資訊
-      - name: Configure git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-      # 如果有變更則 commit 並 push
-      - name: Commit files
-        run: |
-          git add -A
-          git diff-index --quiet HEAD || git commit -m "Daily update $(date)"
-      - name: Push changes
-        run: git push --force
-        env:
-          # 當你的 repository 是私人或需要認證時，可以設定 GITHUB_TOKEN，GitHub Actions 會自動提供此環境變數
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run script and push to GitHub
+      run: |
+        node test.cjs  # 執行你的 Node.js 腳本
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add .
+        git commit -m "Update device list"
+        git push origin main --force
