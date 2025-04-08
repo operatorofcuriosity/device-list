@@ -2,7 +2,7 @@ name: Daily Device List Update
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天 UTC 凌晨 0 點執行
+    - cron: '0 0 * * *'  # 每天 UTC 0:00 執行
   workflow_dispatch:
 
 jobs:
@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
@@ -27,5 +27,10 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Update device list"
-          git push origin main
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update device list"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          fi
