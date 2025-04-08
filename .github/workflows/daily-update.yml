@@ -1,0 +1,31 @@
+name: Daily Device List Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天 UTC 凌晨 0 點執行
+  workflow_dispatch:
+
+jobs:
+  update-devices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run script and push to GitHub
+        run: |
+          node test.cjs
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Update device list"
+          git push origin main
