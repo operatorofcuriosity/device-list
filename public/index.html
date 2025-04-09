@@ -1,43 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>裝置監控清單</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: sans-serif; padding: 2em; background: #f5f5f5; }
-    table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    th, td { padding: 1em; border: 1px solid #ccc; text-align: left; }
-    th { background: #eee; }
-    button { margin-bottom: 1em; padding: 0.5em 1em; }
-  </style>
-  <script>
-    async function fetchDevices() {
-      try {
-        const res = await fetch('device-list.json?ts=' + new Date().getTime())
-;
-        const data = await res.json();
-        const table = document.getElementById("deviceTable");
-        table.innerHTML = "<tr><th>名稱</th><th>IP</th><th>MAC</th><th>位置</th></tr>";
-        data.forEach(device => {
-          const row = table.insertRow();
-          row.insertCell(0).innerText = device.name;
-          row.insertCell(1).innerText = device.ip;
-          row.insertCell(2).innerText = device.mac;
-          row.insertCell(3).innerText = device.location || "—";
-        });
-      } catch (e) {
-        console.error("❌ 載入失敗：", e);
-      }
-    }
-
-    window.onload = fetchDevices;
-    setInterval(fetchDevices, 10000); // 每 10 秒更新
-  </script>
+  <meta charset="UTF-8" />
+  <title>裝置清單 Device List</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>目前連接的裝置</h1>
-  <button onclick="fetchDevices()">🔄 手動刷新</button>
-  <table id="deviceTable"><tr><th>名稱</th><th>IP</th><th>MAC</th><th>位置</th></tr></table>
+  <h1>已連接裝置</h1>
+  <div id="device-list"></div>
+
+  <div id="glitch-overlay" class="hidden">
+    <div class="error-window">
+      <h2>錯誤：連線中斷</h2>
+      <p>無法載入裝置清單，請重試。</p>
+      <button onclick="closeError()">X</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

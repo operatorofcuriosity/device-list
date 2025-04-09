@@ -1,0 +1,84 @@
+body {
+  font-family: monospace;
+  background-color: #111;
+  color: #eee;
+  padding: 2em;
+  overflow: hidden;
+}
+
+h1 {
+  color: #0ff;
+}
+
+#device-list {
+  display: grid;
+  gap: 1em;
+  margin-top: 1em;
+  transition: filter 0.2s ease-in-out;
+}
+
+.device {
+  padding: 1em;
+  background: #222;
+  border: 1px dashed #555;
+  border-radius: 6px;
+  transition: transform 0.1s ease;
+}
+
+.device:hover {
+  transform: scale(1.02);
+}
+
+.glitch {
+  animation: glitchAnim 0.1s infinite;
+  filter: contrast(200%) brightness(150%);
+}
+
+@keyframes glitchAnim {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, 2px); }
+  100% { transform: translate(-2px, -2px); }
+}
+
+#error-sound {
+  display: none;
+}
+
+#error-screen {
+  background: rgba(0, 0, 0, 0.95);
+  color: red;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  display: none;
+}
+
+#error-screen.show {
+  display: flex;
+}
+
+#error-screen .error-window {
+  background: #200;
+  border: 2px solid red;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+#error-screen button {
+  margin-top: 1rem;
+  background: red;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}

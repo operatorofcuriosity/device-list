@@ -9,3 +9,22 @@ AppData/
 *.exe
 *.jar
 __pycache__/
+# 忽略使用者目錄常見資料夾
+AppData/
+Desktop/
+Documents/
+Downloads/
+Music/
+Pictures/
+Videos/
+OneDrive/
+*.pyc
+__pycache__/
+node_modules/
+*.log
+*.bak
+*.tmp
+*.txt
+ntuser.dat*
+*.regtrans-ms
+*.blf
