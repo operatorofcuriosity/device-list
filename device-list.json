@@ -1,0 +1,24 @@
+[
+  {
+    "mac": "3A:45:1C:63:30:67",
+    "timestamp": {
+      "seconds": 1744261074,
+      "nanoseconds": 604000000
+    },
+    "location": "新北市板橋區大觀路一段",
+    "type": "desktop",
+    "ip": "192.168.1.134",
+    "name": "iPhone"
+  },
+  {
+    "location": "新北市板橋區大觀路一段",
+    "mac": "3A:45:1C:63:30:67",
+    "ip": "192.168.1.134",
+    "name": "iPhone",
+    "type": "desktop",
+    "timestamp": {
+      "seconds": 1744262480,
+      "nanoseconds": 693000000
+    }
+  }
+]
