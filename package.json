@@ -4,9 +4,11 @@
   "description": "Local server for device-list.json",
   "main": "server.cjs",
   "scripts": {
-    "start": "node server.cjs"
+    "start": "node server.cjs",
+    "fetch": "node secrets/test.cjs"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "firebase": "^11.6.0"
   }
 }
