@@ -1,44 +1,24 @@
-{
-  "devices": {
-    "phone-visitor-GalaxyS21-002": {
-      "device": "Samsung Galaxy S21",
-      "ip": "192.168.1.36",
-      "lastSeen": "2025-04-05T14:35:48",
-      "os": "Android 13",
-      "owner": "visitor",
-      "type": "mobile"
+[
+  {
+    "mac": "3A:45:1C:63:30:67",
+    "timestamp": {
+      "seconds": 1744261074,
+      "nanoseconds": 604000000
     },
-    "phone-visitor-Pixel6-003": {
-      "device": "Google Pixel 6",
-      "ip": "192.168.1.42",
-      "lastSeen": "2025-04-05T14:36:12",
-      "os": "Android 14",
-      "owner": "visitor",
-      "type": "mobile"
-    },
-    "phone-visitor-RedmiNote10-005": {
-      "device": "Redmi Note 10",
-      "ip": "192.168.1.57",
-      "lastSeen": "2025-04-05T14:40:15",
-      "os": "Android 12",
-      "owner": "visitor",
-      "type": "mobile"
-    },
-    "phone-visitor-iPhone12-004": {
-      "device": "iPhone 12",
-      "ip": "192.168.1.51",
-      "lastSeen": "2025-04-05T14:38:20",
-      "os": "iOS 16.7.2",
-      "owner": "visitor",
-      "type": "mobile"
-    },
-    "phone-visitor-iPhone14-001": {
-      "device": "iPhone 14",
-      "ip": "192.168.1.21",
-      "lastSeen": "2025-04-05T14:32:00",
-      "os": "iOS 17.3.1",
-      "owner": "visitor",
-      "type": "mobile"
+    "location": "新北市板橋區大觀路一段",
+    "type": "desktop",
+    "ip": "192.168.1.134",
+    "name": "iPhone"
+  },
+  {
+    "location": "新北市板橋區大觀路一段",
+    "mac": "3A:45:1C:63:30:67",
+    "ip": "192.168.1.134",
+    "name": "iPhone",
+    "type": "desktop",
+    "timestamp": {
+      "seconds": 1744262480,
+      "nanoseconds": 693000000
     }
   }
-}
+]
