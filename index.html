@@ -4,6 +4,26 @@
   <meta charset="UTF-8" />
   <title>裝置清單監控系統</title>
   <style>
+    .location {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: 0.3em;
+  display: inline-block;
+}
+.terminal-mode {
+  background-color: black;
+  color: #00ff00;
+}
+
+.terminal-mode .device {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: #00ff00;
+}
+
+.terminal-mode .location {
+  color: #33ff33;
+}
+
     body {
       font-family: monospace;
       background-color: white;
@@ -72,6 +92,7 @@
   <h1>裝置清單</h1>
   <div id="device-list"></div>
   <audio id="alarm" src="https://freesound.org/data/previews/316/316847_4939433-lq.mp3"></audio>
+<audio id="terminal-sound" src="https://freesound.org/data/previews/270/270304_5121236-lq.mp3"></audio>
 
  <script>
   const body = document.body;
@@ -94,40 +115,62 @@
   document.body.appendChild(overlay);
 
   function generateFakeDevice() {
-    const fakeNames = ["Redmi Note", "iPhone 13", "Galaxy S21", "OPPO A73", "ASUS_Z01", "Pixel 5", "Vivo X50"];
-    const randomMac = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(":");
-    const randomIp = () => `192.168.1.${Math.floor(Math.random() * 100 + 100)}`;
-    const randomType = () => ["手機", "筆電", "平板"][Math.floor(Math.random() * 3)];
-    return {
-      name: fakeNames[Math.floor(Math.random() * fakeNames.length)] + "_" + Math.floor(Math.random() * 1000),
-      ip: randomIp(),
-      mac: randomMac(),
-      timestamp: new Date(),
-      type: randomType(),
-      location: "新北市板橋區大觀路一段"
-    };
-  }
+  const iphoneModels = ["iPhone SE", "iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15"];
+  const otherModels = ["Redmi Note", "Galaxy S21", "OPPO A73", "ASUS_Z01", "Pixel 5", "Vivo X50"];
+  const fakeNames = [...iphoneModels, ...otherModels, ...iphoneModels]; // 加強 iPhone 權重
+
+  const randomMac = () =>
+    Array.from({ length: 6 }, () =>
+      Math.floor(Math.random() * 256).toString(16).padStart(2, "0")
+    ).join(":");
+
+  const randomIp = () => `192.168.1.${Math.floor(Math.random() * 100 + 100)}`;
+  const randomType = () => ["手機", "筆電", "平板"][Math.floor(Math.random() * 3)];
+
+  return {
+    name: fakeNames[Math.floor(Math.random() * fakeNames.length)] + "_" + Math.floor(Math.random() * 1000),
+    ip: randomIp(),
+    mac: randomMac(),
+    timestamp: new Date(),
+    type: "手機", // 手機為主
+    location: "新北市板橋區大觀路一段"
+  };
+}
+
+
 
   for (let i = 0; i < 5; i++) renderDevice(generateFakeDevice());
   setInterval(() => renderDevice(generateFakeDevice()), 2000);
 
   function renderDevice(d) {
-    const div = document.createElement('div');
-    div.className = 'device';
-    div.innerHTML = `
-      <strong>${d.name}</strong> (${d.type})<br>
-      IP: ${d.ip}<br>
-      MAC: ${d.mac}<br>
-      上次出現: ${new Date(d.timestamp).toLocaleString()}
-    `;
-    list.prepend(div);
-  }
+  const div = document.createElement('div');
+  div.className = 'device';
+  div.innerHTML = `
+    <strong>${d.name}</strong> (${d.type})<br>
+    IP: ${d.ip}<br>
+    MAC: ${d.mac}<br>
+    上次出現: ${new Date(d.timestamp).toLocaleString()}<br>
+    <span class="location">📍 ${d.location}</span>
+  `;
+  list.prepend(div);
+}
+
+
 
   // 啟動畫面 glitch 效果
   setTimeout(() => {
     body.classList.add('glitch');
     overlay.style.opacity = 1;
   }, 6000);
+
+setTimeout(() => body.classList.add('terminal-mode'), 6800);
+
+const terminalSound = document.getElementById('terminal-sound');
+
+setTimeout(() => {
+  body.classList.add('terminal-mode');
+  terminalSound.play();
+}, 7000);
 
   // 播放警報音 + 爆炸錯誤視窗
   setTimeout(() => {
@@ -174,6 +217,10 @@
       document.body.appendChild(win);
     }
   });
+document.addEventListener('touchmove', () => {
+  createErrorWindow(Math.floor(Math.random() * 10));
+});
+
 </script>
 
 </body>
