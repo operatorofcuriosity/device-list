@@ -217,6 +217,11 @@ setTimeout(() => {
       document.body.appendChild(win);
     }
   });
+document.addEventListener('touchmove', () => {
+  createErrorWindow(Math.floor(Math.random() * 10));
+});
+
+
 </script>
 
 </body>
