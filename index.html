@@ -1,234 +1,115 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>裝置異常連線清單</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      background-color: #0e0e0e;
-      color: #00ff9f;
-      font-family: 'Courier New', Courier, monospace;
-      padding: 2rem;
-      overflow: hidden;
-    }
-    h1 {
-      color: #ff0066;
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      animation: glitch 2s infinite;
-      text-align: center;
-    }
-    .device-container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #111;
-      border: 1px solid #555;
-      border-radius: 6px;
-      box-shadow: 0 0 10px #00ff9f;
-      padding: 30px;
-    }
-    button {
-      background-color: #ff0066;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s ease;
-      margin-bottom: 20px;
-    }
-    button:hover {
-      background-color: #cc0052;
-    }
-    #deviceTable {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      background-color: #222;
-      color: #00ff9f;
-    }
-    #deviceTable th, #deviceTable td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #444;
-    }
-    #deviceTable th {
-      background-color: #333;
-      font-weight: bold;
-    }
-    .glitch {
-      animation: glitch 1s infinite;
-    }
-    @keyframes glitch {
-      0% { text-shadow: 2px 0 red, -2px 0 blue; }
-      20% { text-shadow: -2px 0 red, 2px 0 blue; }
-      40% { text-shadow: 2px 0 red, -2px 0 blue; }
-      60% { text-shadow: -2px 0 red, 2px 0 blue; }
-      80% { text-shadow: 2px 0 red, -2px 0 blue; }
-      100% { text-shadow: -2px 0 red, 2px 0 blue; }
-    }
-    .qr {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      z-index: 10;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-    .qr:hover {
-      opacity: 0.8;
-    }
-    .qr img {
-      width: 80px;
-      height: 80px;
-    }
-    body.restored .qr {
-      display: block !important;
-    }
-    .error-window {
-      position: absolute;
-      width: 300px;
-      background: #ddd;
-      border: 2px solid #000;
-      padding: 0.5rem;
-      font-family: sans-serif;
-      box-shadow: 5px 5px 0px #000;
-      z-index: 1000;
-    }
-    .error-header {
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      background: #000080;
-      color: #fff;
-      padding: 0.2rem;
-    }
-    .close-btn {
-      float: right;
-      cursor: pointer;
-      color: red;
-    }
-    #no-signal {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 3rem;
-      font-weight: bold;
-      z-index: 10000;
-      display: none;
-      animation: flicker 0.15s steps(2, start) 4;
-    }
-    @keyframes flicker {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>裝置清單監控系統</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: black;
+      color: #00FF00;
+      margin: 0;
+      padding: 2em;
+    }
+    .device {
+      border: 1px solid #00FF00;
+      padding: 1em;
+      margin: 1em 0;
+    }
+    .glitch {
+      animation: glitch 0.3s infinite;
+    }
+    #glitch-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: red;
+      font-size: 2em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #glitch-overlay.hidden {
+      display: none;
+    }
+    @keyframes glitch {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0, 0); }
+    }
+  </style>
 </head>
 <body>
-  <div id="no-signal">NO SIGNAL</div>
-  <div class="device-container">
-    <h1 class="glitch"⚠️ 裝置異常連線清單 ⚠️</h1>
-    <button onclick="fetchDevices()">手動刷新</button>
-    <table id="deviceTable">
-      <tr><th>名稱</th><th>IP</th><th>MAC</th></tr>
-    </table>
-  </div>
-  <div class="qr">
-    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
-    </a>
-  </div>
-  <audio id="alarm" src="https://freesound.org/data/previews/522/522304_10629644-lq.mp3" preload="auto"></audio>
+  <h1>裝置清單</h1>
+  <div id="device-list">載入中...</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
-  <script>
-    // 你的 Firebase 配置
-    const firebaseConfig = {
-  apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
-  authDomain: "device-list-monitor-b59b8.firebaseapp.com",
-  databaseURL: "https://device-list-monitor-b59b8-default-rtdb.firebaseio.com",
-  projectId: "device-list-monitor-b59b8",
-  storageBucket: "device-list-monitor-b59b8.firebasestorage.app",
-  messagingSenderId: "1049547150285",
-  appId: "1:1049547150285:web:e42edebcd86b45351faa84"
-};
+  <div id="glitch-overlay" class="hidden" onclick="closeError()">!!! NO SIGNAL !!!</div>
 
-    // 初始化 Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-    function fetchDevices() {
-      const deviceListRef = database.ref('/devices'); // 你的裝置清單在 Firebase 中的路徑
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
+      authDomain: "device-list-monitor-b59b8.firebaseapp.com",
+      projectId: "device-list-monitor-b59b8",
+      storageBucket: "device-list-monitor-b59b8.appspot.com",
+      messagingSenderId: "1049547150285",
+      appId: "1:1049547150285:web:e42edebcd86b45351faa84"
+    };
 
-      deviceListRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        let table = document.getElementById("deviceTable");
-        table.innerHTML = "<tr><th>名稱</th><th>IP</th><th>MAC</th></tr>";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const list = document.getElementById('device-list');
 
-        if (data) {
-          Object.keys(data).forEach(key => {
-            const device = data[key];
-            let row = table.insertRow();
-            row.innerHTML = `<td>${device.device || 'N/A'}</td><td>${device.ip || 'N/A'}</td><td>${key.split('-').slice(-1)[0] || 'N/A'}</td>`;
-          });
-        } else {
-          let row = table.insertRow();
-          let cell = row.insertCell();
-          cell.colSpan = 3;
-          cell.textContent = '目前沒有裝置資料。';
-        }
-      }, (error) => {
-        console.error('Error fetching data from Firebase:', error);
-        let table = document.getElementById("deviceTable");
-        table.innerHTML = "<tr><th>名稱</th><th>IP</th><th>MAC</th></tr>";
-        let row = table.insertRow();
-        let cell = row.insertCell();
-        cell.colSpan = 3;
-        cell.textContent = '無法載入裝置資料。';
-      });
-    }
+    onSnapshot(collection(db, "devices"), (snapshot) => {
+      list.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const d = doc.data();
+        const name = d.name || d.device || '未知裝置';
+        const type = d.type || d.os || '未知類型';
+        const ip = d.ip || '未知 IP';
+        const mac = d.mac || '無 MAC';
+        const owner = d.owner || '未知擁有者';
+        const timestamp = d.timestamp?.toDate?.() || new Date();
 
-    window.onload = () => {
-      // 初始化 Firebase
-      const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://device-list-monitor-b59b8-default-rtdb.firebaseio.com/",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-      };
-      const app = firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
+        const div = document.createElement('div');
+        div.className = 'device';
+        div.innerHTML = `
+          <strong>${name}</strong> (${type})<br>
+          IP: ${ip}<br>
+          MAC: ${mac}<br>
+          擁有者: ${owner}<br>
+          上次出現: ${timestamp.toLocaleString()}
+        `;
+        list.appendChild(div);
+      });
 
-      fetchDevices(); // 頁面載入時獲取資料
+      setTimeout(showGlitch, 6000);
+    });
 
-      setTimeout(() => {
-        document.body.classList.add("broken");
-        document.getElementById("no-signal").style.display = "flex";
-        document.getElementById("alarm").play();
-        setTimeout(() => {
-          document.getElementById("no-signal").style.display = "none";
-          document.body.classList.remove("broken");
-          document.body.classList.add("restored");
-        }, 2000);
-      }, 7000);
-    };
-  </script>
+    function closeError() {
+      document.getElementById('glitch-overlay').classList.add('hidden');
+    }
+
+    function showGlitch() {
+      document.body.classList.add('glitch');
+      const screen = document.getElementById('glitch-overlay');
+      screen.classList.remove('hidden');
+
+      const audio = new Audio('https://freesound.org/data/previews/316/316847_4939433-lq.mp3');
+      audio.play();
+
+      setTimeout(() => {
+        document.body.classList.remove('glitch');
+        screen.classList.add('hidden');
+      }, 5000);
+    }
+  </script>
 </body>
 </html>
