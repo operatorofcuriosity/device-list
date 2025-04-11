@@ -10,165 +10,171 @@
       color: black;
       margin: 0;
       padding: 2em;
-      transition: all 0.5s;
+      transition: all 0.3s;
+      overflow: hidden;
+      position: relative;
     }
-
     .device {
-      border: 1px solid #ccc;
+      border: 1px solid #999;
       padding: 1em;
       margin: 1em 0;
-      background-color: #f5f5f5;
+      background: rgba(255,255,255,0.9);
     }
-
     .glitch {
-      animation: glitch 0.2s infinite;
+      animation: glitch 0.1s infinite;
     }
-
-    .dark-mode {
-      background-color: black !important;
-      color: #00FF00 !important;
-    }
-
-    .device.dark-mode {
-      background-color: black !important;
-      border-color: #00FF00 !important;
-    }
-
-    @keyframes glitch {
-      0% { transform: translate(0, 0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(2px, -2px); }
-      60% { transform: translate(-1px, 1px); }
-      80% { transform: translate(1px, -1px); }
-      100% { transform: translate(0, 0); }
-    }
-
     .error-window {
-      position: fixed;
-      top: 10%;
-      left: 10%;
-      width: 300px;
-      background: white;
-      border: 2px solid red;
-      color: red;
-      font-family: sans-serif;
+      position: absolute;
+      width: 200px;
       padding: 1em;
-      z-index: 9999;
-      box-shadow: 0 0 20px red;
+      background: white;
+      color: red;
+      border: 2px solid red;
+      box-shadow: 4px 4px black;
+      z-index: 999;
+      font-size: 14px;
+      animation: glitch 0.1s infinite, shake 0.5s infinite;
     }
-
-    .hidden {
-      display: none;
-    }
-
-    #blackout {
+    .no-signal {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: black;
-      z-index: 99999;
-      display: none;
+      color: white;
+      font-size: 3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: flash 0.2s steps(2, start) 8;
+    }
+    @keyframes glitch {
+      0% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
+      20% { transform: translate(-2px, 2px) scale(1.01); filter: hue-rotate(30deg); }
+      40% { transform: translate(2px, -2px) scale(0.99); filter: hue-rotate(-30deg); }
+      60% { transform: translate(-1px, 1px) scale(1.02); filter: hue-rotate(60deg); }
+      80% { transform: translate(1px, -1px) scale(0.98); filter: hue-rotate(-60deg); }
+      100% { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translate(0, 0); }
+      25% { transform: translate(-10px, 0); }
+      50% { transform: translate(10px, 0); }
+      75% { transform: translate(-10px, 0); }
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
   </style>
 </head>
 <body>
   <h1>裝置清單</h1>
-  <div id="device-list">載入中...</div>
+  <div id="device-list"></div>
+  <audio id="alarm" src="https://freesound.org/data/previews/316/316847_4939433-lq.mp3"></audio>
 
-  <div id="blackout"></div>
+ <script>
+  const body = document.body;
+  const alarm = document.getElementById('alarm');
+  const list = document.getElementById('device-list');
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+  // 建立 CRT glitch 背景
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = 998;
+  overlay.style.mixBlendMode = 'difference';
+  overlay.style.background = 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 3px)';
+  overlay.style.opacity = 0;
+  overlay.style.transition = 'opacity 0.3s';
+  document.body.appendChild(overlay);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBwyVgeoxAOZmMyg3UeIqn5LF6iI65NonE",
-      authDomain: "device-list-monitor-b59b8.firebaseapp.com",
-      projectId: "device-list-monitor-b59b8",
-      storageBucket: "device-list-monitor-b59b8.appspot.com",
-      messagingSenderId: "1049547150285",
-      appId: "1:1049547150285:web:e42edebcd86b45351faa84"
+  function generateFakeDevice() {
+    const fakeNames = ["Redmi Note", "iPhone 13", "Galaxy S21", "OPPO A73", "ASUS_Z01", "Pixel 5", "Vivo X50"];
+    const randomMac = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(":");
+    const randomIp = () => `192.168.1.${Math.floor(Math.random() * 100 + 100)}`;
+    const randomType = () => ["手機", "筆電", "平板"][Math.floor(Math.random() * 3)];
+    return {
+      name: fakeNames[Math.floor(Math.random() * fakeNames.length)] + "_" + Math.floor(Math.random() * 1000),
+      ip: randomIp(),
+      mac: randomMac(),
+      timestamp: new Date(),
+      type: randomType(),
+      location: "新北市板橋區大觀路一段"
     };
+  }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const list = document.getElementById('device-list');
+  for (let i = 0; i < 5; i++) renderDevice(generateFakeDevice());
+  setInterval(() => renderDevice(generateFakeDevice()), 1000);
 
-    function renderDevice(d) {
-      const name = d.name || d.device || '未知裝置';
-      const type = d.type || d.os || '未知類型';
-      const ip = d.ip || '未知 IP';
-      const mac = d.mac || '無 MAC';
-      const timestamp = d.timestamp?.toDate?.() || d.timestamp || new Date();
+  function renderDevice(d) {
+    const div = document.createElement('div');
+    div.className = 'device';
+    div.innerHTML = `
+      <strong>${d.name}</strong> (${d.type})<br>
+      IP: ${d.ip}<br>
+      MAC: ${d.mac}<br>
+      上次出現: ${new Date(d.timestamp).toLocaleString()}
+    `;
+    list.prepend(div);
+  }
 
-      const div = document.createElement('div');
-      div.className = 'device';
-      div.innerHTML = `
-        <strong>${name}</strong> (${type})<br>
-        IP: ${ip}<br>
-        MAC: ${mac}<br>
-        上次出現: ${new Date(timestamp).toLocaleString()}
-      `;
-      list.appendChild(div);
+  // 啟動畫面 glitch 效果
+  setTimeout(() => {
+    body.classList.add('glitch');
+    overlay.style.opacity = 1;
+  }, 6000);
+
+  // 播放警報音 + 爆炸錯誤視窗
+  setTimeout(() => {
+    alarm.play();
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => createErrorWindow(), i * 150);
     }
+  }, 10000);
 
-    function generateFakeDevice() {
-      const names = ["Redmi", "iPhone", "Galaxy", "Pixel", "ASUS"];
-      return {
-        name: names[Math.floor(Math.random() * names.length)] + "_" + Math.floor(Math.random() * 1000),
-        ip: `192.168.1.${Math.floor(Math.random() * 100 + 100)}`,
-        mac: Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(":"),
-        type: "phone",
-        timestamp: new Date()
-      };
-    }
+  setTimeout(() => showNoSignal(), 12000);
+  setTimeout(() => {
+    body.style.backgroundColor = 'black';
+    body.style.color = 'black';
+  }, 13500);
+  setTimeout(() => {
+    window.location.href = "about:blank";
+    window.close();
+  }, 15000);
 
-    onSnapshot(collection(db, "devices"), (snapshot) => {
-      list.innerHTML = "";
-      snapshot.forEach((doc) => {
-        renderDevice(doc.data());
-      });
+  function createErrorWindow() {
+    const win = document.createElement('div');
+    win.className = 'error-window';
+    win.style.top = `${Math.random() * window.innerHeight * 0.8}px`;
+    win.style.left = `${Math.random() * window.innerWidth * 0.8}px`;
+    win.textContent = "ERROR: Unrecognized Device";
+    document.body.appendChild(win);
+  }
 
-      for (let i = 0; i < Math.floor(Math.random() * 3) + 3; i++) {
-        renderDevice(generateFakeDevice());
-      }
+  function showNoSignal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'no-signal';
+    overlay.textContent = 'NO SIGNAL';
+    document.body.appendChild(overlay);
+  }
 
-      startCorruptionSequence();
-    });
-
-    function showErrorWindow(msg = "Error: Unexpected Device") {
-      const win = document.createElement("div");
-      win.className = "error-window";
-      win.textContent = msg;
+  // 滑鼠移動觸發錯誤視窗爆發
+  document.addEventListener('mousemove', (e) => {
+    for (let i = 0; i < 3; i++) {
+      const win = document.createElement('div');
+      win.className = 'error-window';
+      win.style.top = `${e.clientY + Math.random() * 100 - 50}px`;
+      win.style.left = `${e.clientX + Math.random() * 100 - 50}px`;
+      win.textContent = "ERROR: Device Breach Detected";
       document.body.appendChild(win);
-      setTimeout(() => win.remove(), 3000);
     }
+  });
+</script>
 
-    function startCorruptionSequence() {
-      setTimeout(() => document.body.classList.add("glitch"), 6000);
-
-      setTimeout(() => {
-        document.body.classList.add("dark-mode");
-        document.querySelectorAll('.device').forEach(d => d.classList.add("dark-mode"));
-        showErrorWindow();
-      }, 9000);
-
-      setTimeout(() => {
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => showErrorWindow("NO SIGNAL"), i * 400);
-        }
-      }, 11000);
-
-      setTimeout(() => {
-        document.getElementById("blackout").style.display = "block";
-      }, 14000);
-
-      setTimeout(() => {
-        window.location.href = "about:blank";  // 你也可以改成導向其他互動頁面
-      }, 16000);
-    }
-  </script>
 </body>
 </html>
