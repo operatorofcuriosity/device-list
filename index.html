@@ -99,116 +99,119 @@
 
   <script>
     const body = document.body;
-    const alarm = document.getElementById('alarm');
-    const list = document.getElementById('device-list');
+  const alarm = document.getElementById('alarm');
+  const list = document.getElementById('device-list');
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = 998;
+  overlay.style.mixBlendMode = 'difference';
+  overlay.style.background = 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 3px)';
+  overlay.style.opacity = 0;
+  overlay.style.transition = 'opacity 0.3s';
+  document.body.appendChild(overlay);
+
+  let isGlitchPhase = false; // 控制是否進入互動錯誤階段
+
+  function generateFakeDevice() {
+    const iphoneModels = ["iPhone SE", "iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15"];
+    const otherModels = ["Redmi Note", "Galaxy S21", "OPPO A73", "ASUS_Z01", "Pixel 5", "Vivo X50"];
+    const fakeNames = [...iphoneModels, ...otherModels, ...iphoneModels];
+    const randomMac = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(":");
+    const randomIp = () => `192.168.1.${Math.floor(Math.random() * 100 + 100)}`;
+    return {
+      name: fakeNames[Math.floor(Math.random() * fakeNames.length)] + "_" + Math.floor(Math.random() * 1000),
+      ip: randomIp(),
+      mac: randomMac(),
+      timestamp: new Date(),
+      type: "手機",
+      location: "新北市板橋區大觀路一段"
+    };
+  }
+
+  for (let i = 0; i < 5; i++) renderDevice(generateFakeDevice());
+  setInterval(() => renderDevice(generateFakeDevice()), 2000);
+
+  function renderDevice(d) {
+    const div = document.createElement('div');
+    div.className = 'device';
+    div.innerHTML = `
+      <strong>${d.name}</strong> (${d.type})<br>
+      IP: ${d.ip}<br>
+      MAC: ${d.mac}<br>
+      上次出現: ${new Date(d.timestamp).toLocaleString()}<br>
+      <span class="location">📍 ${d.location}</span>
+    `;
+    list.prepend(div);
+  }
+
+  setTimeout(() => {
+    body.classList.add('glitch');
+    overlay.style.opacity = 1;
+  }, 6000);
+
+  const terminalSound = document.getElementById('terminal-sound');
+  setTimeout(() => {
+    body.classList.add('terminal-mode');
+    terminalSound.play();
+  }, 7000);
+
+  setTimeout(() => {
+    isGlitchPhase = true; // 開始進入互動錯誤階段
+    alarm.play();
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => createErrorWindow(), i * 150);
+    }
+  }, 10000);
+
+  setTimeout(() => showNoSignal(), 12000);
+
+  setTimeout(() => {
+    body.style.backgroundColor = 'black';
+    body.style.color = 'black';
+  }, 13500);
+
+  setTimeout(() => {
+    window.location.href = "about:blank";
+    window.close();
+  }, 15000);
+
+  function createErrorWindow() {
+    const win = document.createElement('div');
+    win.className = 'error-window';
+    win.style.top = `${Math.random() * window.innerHeight * 0.8}px`;
+    win.style.left = `${Math.random() * window.innerWidth * 0.8}px`;
+    win.textContent = "ERROR: Unrecognized Device";
+    document.body.appendChild(win);
+  }
+
+  function showNoSignal() {
     const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.pointerEvents = 'none';
-    overlay.style.zIndex = 998;
-    overlay.style.mixBlendMode = 'difference';
-    overlay.style.background = 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 3px)';
-    overlay.style.opacity = 0;
-    overlay.style.transition = 'opacity 0.3s';
+    overlay.className = 'no-signal';
+    overlay.textContent = 'NO SIGNAL';
     document.body.appendChild(overlay);
+  }
 
-    function generateFakeDevice() {
-      const iphoneModels = ["iPhone SE", "iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 15"];
-      const otherModels = ["Redmi Note", "Galaxy S21", "OPPO A73", "ASUS_Z01", "Pixel 5", "Vivo X50"];
-      const fakeNames = [...iphoneModels, ...otherModels, ...iphoneModels];
-      const randomMac = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0")).join(":");
-      const randomIp = () => `192.168.1.${Math.floor(Math.random() * 100 + 100)}`;
-      return {
-        name: fakeNames[Math.floor(Math.random() * fakeNames.length)] + "_" + Math.floor(Math.random() * 1000),
-        ip: randomIp(),
-        mac: randomMac(),
-        timestamp: new Date(),
-        type: "手機",
-        location: "新北市板橋區大觀路一段"
-      };
-    }
-
-    for (let i = 0; i < 5; i++) renderDevice(generateFakeDevice());
-    setInterval(() => renderDevice(generateFakeDevice()), 2000);
-
-    function renderDevice(d) {
-      const div = document.createElement('div');
-      div.className = 'device';
-      div.innerHTML = `
-        <strong>${d.name}</strong> (${d.type})<br>
-        IP: ${d.ip}<br>
-        MAC: ${d.mac}<br>
-        上次出現: ${new Date(d.timestamp).toLocaleString()}<br>
-        <span class="location">📍 ${d.location}</span>
-      `;
-      list.prepend(div);
-    }
-
-    // 畫面效果流程
-    setTimeout(() => {
-      body.classList.add('glitch');
-      overlay.style.opacity = 1;
-    }, 6000);
-
-    const terminalSound = document.getElementById('terminal-sound');
-    setTimeout(() => {
-      body.classList.add('terminal-mode');
-      terminalSound.play();
-    }, 7000);
-
-    setTimeout(() => {
-      alarm.play();
-      for (let i = 0; i < 20; i++) {
-        setTimeout(() => createErrorWindow(), i * 150);
-      }
-    }, 10000);
-
-    setTimeout(() => showNoSignal(), 12000);
-
-    // 崩壞後黑屏 + 關閉頁面
-    setTimeout(() => {
-      body.style.backgroundColor = 'black';
-      body.style.color = 'black';
-    }, 13500);
-
-    setTimeout(() => {
-      window.location.href = "about:blank";
-      window.close();
-    }, 15000);
-
-    function createErrorWindow() {
+  document.addEventListener('mousemove', (e) => {
+    if (!isGlitchPhase) return;
+    for (let i = 0; i < 3; i++) {
       const win = document.createElement('div');
       win.className = 'error-window';
-      win.style.top = `${Math.random() * window.innerHeight * 0.8}px`;
-      win.style.left = `${Math.random() * window.innerWidth * 0.8}px`;
-      win.textContent = "ERROR: Unrecognized Device";
+      win.style.top = `${e.clientY + Math.random() * 100 - 50}px`;
+      win.style.left = `${e.clientX + Math.random() * 100 - 50}px`;
+      win.textContent = "ERROR: Device Breach Detected";
       document.body.appendChild(win);
     }
+  });
 
-    function showNoSignal() {
-      const overlay = document.createElement('div');
-      overlay.className = 'no-signal';
-      overlay.textContent = 'NO SIGNAL';
-      document.body.appendChild(overlay);
-    }
-
-    document.addEventListener('mousemove', (e) => {
-      for (let i = 0; i < 3; i++) {
-        const win = document.createElement('div');
-        win.className = 'error-window';
-        win.style.top = `${e.clientY + Math.random() * 100 - 50}px`;
-        win.style.left = `${e.clientX + Math.random() * 100 - 50}px`;
-        win.textContent = "ERROR: Device Breach Detected";
-        document.body.appendChild(win);
-      }
-    });
-
-    document.addEventListener('touchmove', () => {
-      createErrorWindow(Math.floor(Math.random() * 10));
-    });
+  document.addEventListener('touchmove', () => {
+    if (!isGlitchPhase) return;
+    createErrorWindow(Math.floor(Math.random() * 10));
+  });
   </script>
 </body>
 </html>
